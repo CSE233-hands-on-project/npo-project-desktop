@@ -1,5 +1,4 @@
 from tkinter import *
-from typing import List
 from dbmanip import DatabaseConnector as dbc
 
 w = 400
