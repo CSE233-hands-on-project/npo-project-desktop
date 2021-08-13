@@ -22,7 +22,7 @@ def go_login():
 
         elif record:
             if record[0][3] == password_entry.get(): root.destroy(); userproceed(record[0][1], record[0][2])
-            else: response_label.config(text="Incorrect password.", fg="red")
+            else: response_label.config(text="Incorrect password.", fg="red"); login_button.config(state="normal")
 
         else:
             response_label.config(text="User does not exist.", fg="red")
