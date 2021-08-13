@@ -26,6 +26,12 @@ def userproceed(fullname, usertypeid):
     for module in modules:
         Button(dashboard, text=module[0], width=32, relief="groove",
                command=lambda filename=module[1]: exec(open(f'modules/{filename}.py').read())).pack(pady=4)
+        # ....................^ https://realpython.com/python-lambda/#evaluation-time
+        # And for more insight: https://realpython.com/python-lambda/#closure
+        # In short, using {module[1]} directly would lead to the lambda function evaluating that value during execution
+        # In other words, it will not fetch/store the value of the variable during the function definition
+        # Since this is a loop, the last value for "module" is the last value in the "modules" list
+        # Accordingly, whenever the lambda function is executed later, it will fetch that value
 
     def switch_to_login_panel():
         from login_panel import go_login; dashboard.destroy(); go_login()
