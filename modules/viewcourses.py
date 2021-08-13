@@ -1,0 +1,1 @@
+print("View Offered Courses")

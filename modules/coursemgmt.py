@@ -1,0 +1,1 @@
+print("Manage Courses")
