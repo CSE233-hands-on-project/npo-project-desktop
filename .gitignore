@@ -2,4 +2,7 @@
 .idea
 .venv/*
 .vscode/*
-__pycache__/*
+*__pycache__*
+dist/*
+build/*
+login_panel.spec

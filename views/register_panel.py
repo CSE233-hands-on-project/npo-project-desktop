@@ -1,16 +1,15 @@
 from tkinter import *
-from dbmanip import DatabaseConnector as dbc
+from models.user import User
 
 w = 400
 h = 300
 
 
-def register():
-
-    dbconnection = dbc(host="localhost", port="3306", usr="root", db="npo_proj_mock")
+def launch():
 
     form = Tk()
-    form.resizable(FALSE, FALSE)
+    Grid.rowconfigure(form, 0, weight=1)
+    Grid.columnconfigure(form, 0, weight=1)
     form.title('CSE233 Project - Registration Form')
     form.geometry(f"{w}x{h}+{(form.winfo_screenwidth() - w) // 2}+{(form.winfo_screenheight() - h) // 2}")
 
@@ -20,7 +19,7 @@ def register():
     password_label = Label(form, text="Password:", width=10)
     password_entry = Entry(form, width=50, show="*")
 
-    usertypes = dbconnection.submit_query(f'SELECT id, name FROM usertype')
+    usertypes = dbconnection.submit_query(f'SELECT id, name FROM usertypes')
     usertype_label = Label(form, text="Usertype:", width=10)
     usertype_lstbx = Listbox(form, width=50, height=len(usertypes))
     for usertype in usertypes: usertype_lstbx.insert(usertype[0], usertype[1])
@@ -56,6 +55,3 @@ def register():
     return_button.grid(row=4, column=0, columnspan=2)
 
     mainloop()  # infinite loop to keep window open
-
-
-if __name__ == "__main__": register()

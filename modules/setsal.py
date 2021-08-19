@@ -1,1 +1,0 @@
-print("Set Salary")
