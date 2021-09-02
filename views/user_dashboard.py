@@ -1,4 +1,4 @@
-from tkinter import *
+from tkinter import Tk, Label, Message, Button, mainloop
 from models.user import User
 from views import signin_panel
 from importlib import import_module
@@ -7,7 +7,7 @@ from importlib import import_module
 def launch(user: User):
 
     dashboard = Tk()
-    dashboard.resizable(FALSE, FALSE)
+    dashboard.resizable(False, False)
     dashboard.title('CSE233 Project - User Dashboard')
     welcome_label = Label(dashboard, text=f'Welcome, {user.usertype}...', width=65); welcome_label.pack(pady=[32, 0])
     name_label = Label(dashboard, text=user.fullname, font="Times 12 bold italic"); name_label.pack(pady=[0, 20])

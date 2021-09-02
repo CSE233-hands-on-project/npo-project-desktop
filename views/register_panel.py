@@ -1,5 +1,4 @@
-from tkinter import *
-from models.user import User
+from tkinter import Tk, Label, Grid, Entry, Listbox
 
 w = 400
 h = 300

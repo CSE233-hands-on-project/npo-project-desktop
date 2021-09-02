@@ -1,67 +1,79 @@
-from tkinter import *     # whole tkinter (GUI Package) is imported directly
-from PIL import ImageTk, Image
+from tkinter import Frame, ttk, Label, Entry, Button, PhotoImage
 
-from models.user import User
-from views import user_dashboard
+from controllers import userlogin
+from .abstractview import AbstractView
 
 
-def launch():
+class SigninPanel(AbstractView):
 
-    root = Tk()  # creates the landing page (login panel in this case) and put it into variable called root
-    root.title('CSE233 Project - Landing Page')
+    def launch(self):
 
-    # Image, title, and welcome text section
-    image = Image.open("./assets/Charity.png")  # Read the Image
-    resized_image = image.resize((100, 100))  # Resize the image using resize() method
-    imgtk = ImageTk.PhotoImage(resized_image)  # Convert resized image to ImageTk
-    img = Label(image=imgtk)  # Create label containing resized image
-    title = Label(root, text="Charity Organization", fg="light green", bg="dark green", font="Helvetica 24 bold italic")
-    descr1 = Label(root, text="Welcome to your organization management portal", font="Times 16")
-    descr2 = Label(root, text="Please enter your username and password below", font="Calibri 12")
+        self.root.title('CSE233 Project - Landing Page')
+        self.build_header()
+        self.build_form()
+        self.build_extras()
 
-    title.grid(row=0, column=0, padx=40, pady=10, columnspan=2)  # Place title
-    img.grid(row=0, column=2, padx=40, pady=10)  # Place image
-    descr1.grid(row=1, column=0, pady=[20, 0], columnspan=3)  # Place description below them
-    descr2.grid(row=2, column=0, pady=[0, 20], columnspan=3)  # Place description below them
-    # End image, title, and welcome text section
+        for i in range(self.r()): self.root.rowconfigure(i, weight=1)  # Make rows span full width
+        for i in range(self.c()): self.root.columnconfigure(i, weight=1)  # Make columns span full height
 
-    # Login form section
-    def signin():
-        sign_in_button.config(state="disabled")
-        response_label.config(text="Loading...", fg="blue")
+        self.root.eval('tk::PlaceWindow . center')  # Center the window
 
-        if not username_entry.get() or not password_entry.get():
-            response_label.config(text="Please fill the empty fields.", fg="red")
-            sign_in_button.config(state="normal")
+    def build_header(self):
 
-        else:
-            try:
-                user = User(username=username_entry.get(), password=password_entry.get())
-                root.destroy(); user_dashboard.launch(user)
+        # Store the image as an attribute of this object (otherwise it gets garbage collected and can't be used)
+        self.headerimage = PhotoImage(file="./assets/Charity.png")
+        image = Label(self.root, image=self.headerimage)
+        desc1 = Label(self.root, text="Welcome to your organization management portal", font="Times 16")
+        desc2 = Label(self.root, text="Please enter your username and password below", font="Calibri 12")
+
+        image.grid(row=self.r(), column=0, columnspan=3, pady=20)  # Place image in the first row
+        desc1.grid(row=self.r(), column=0, columnspan=3, padx=40)  # Place description 1 below it
+        desc2.grid(row=self.r(), column=0, columnspan=3, pady=[0, 20])  # Place description 2 below it
+
+    def build_form(self):
+
+        def signin():
+
+            sign_in_button.config(state="disabled")
+            response_label.config(text="Loading...", fg="blue")
+
+            self.root.update()  # Required to display the "Loading..." text while it actually loads
+
+            try: userlogin.attempt(username_entry.get(), password_entry.get())
             except ValueError as e:
-                response_label.config(text=str(e), fg="red")
                 sign_in_button.config(state="normal")
+                response_label.config(text=str(e), fg="red")
 
-    username_label = Label(root, text="Username:", font="Calibri 12")
-    username_entry = Entry(root, width=70); username_entry.focus()
-    password_label = Label(root, text="Password:", font="Calibri 12")
-    password_entry = Entry(root, width=70, show="*")
-    sign_in_button = Button(root, width=40, text="Sign in", font="Calibri 12", command=signin)
-    response_label = Label(root, text="")
+        username_label = Label(self.root, text="Username:", font="Calibri 12")
+        username_entry = Entry(self.root, width=50); username_entry.focus()
+        password_label = Label(self.root, text="Password:", font="Calibri 12")
+        password_entry = Entry(self.root, width=50, show="*")
+        sign_in_button = Button(self.root, width=40, text="Sign in", font="Calibri 12", command=signin)
+        response_label = Label(self.root, text="")
+        self.root.bind("<Return>", lambda event: signin())
 
-    username_label.grid(row=3, column=0, pady=5)
-    username_entry.grid(row=3, column=1, padx=[0, 40], columnspan=2, sticky=E + W)
-    password_label.grid(row=4, column=0, pady=5)
-    password_entry.grid(row=4, column=1, padx=[0, 40], columnspan=2, sticky=E + W)
-    sign_in_button.grid(row=5, column=0, pady=[20, 5], columnspan=3)
-    response_label.grid(row=6, column=0, pady=[5, 20], columnspan=3)
-    # End login form section
+        username_label.grid(row=self.r(), column=0, pady=5)
+        username_entry.grid(row=self.r() - 1, column=1, padx=[0, 40], columnspan=2, sticky="ew")
+        password_label.grid(row=self.r(), column=0, pady=5)
+        password_entry.grid(row=self.r() - 1, column=1, padx=[0, 40], columnspan=2, sticky="ew")
+        sign_in_button.grid(row=self.r(), column=0, pady=[20, 5], columnspan=3)
+        response_label.grid(row=self.r(), column=0, pady=[5, 20], columnspan=3)
 
-    root.bind("<Return>", lambda event: signin())
-    root.eval('tk::PlaceWindow . center')  # Center the window
-    root.minsize(root.winfo_reqwidth(), root.winfo_reqheight())
-    root.maxsize(root.winfo_reqwidth() * 2, root.winfo_reqheight() * 2)
-    for i in range(root.grid_size()[1]): root.rowconfigure(i, weight=1)  # Make rows span full width
-    for i in range(root.grid_size()[0]): root.columnconfigure(i, weight=1)  # Make columns span full height
+    def build_extras(self):
 
-    mainloop()  # infinite loop to keep window open
+        # Extra features section for academic project purposes (not actually required by organization)
+        ttk.Separator(self.root, orient='horizontal').grid(sticky="nsew",
+                                                           row=self.r(),
+                                                           columnspan=self.c() if self.c() else 1)
+        eval_label = Label(self.root, text="For demonstration purposes only...", font=('Calibri Light', 10), fg="grey")
+        eval_label.grid(row=self.r(), columnspan=self.c() if self.c() else 1, pady=5)
+
+        # Creating a frame to contain two buttons side-by-side
+        extras = Frame(self.root)
+        donation_button = Button(extras, text="Donate now", width=20, borderwidth=1, command=userlogin.donate)
+        register_button = Button(extras, text="Register for an event (WIP)", width=20, borderwidth=1, state='disabled')
+        donation_button.grid(row=0, column=0, padx=5)
+        register_button.grid(row=0, column=1, padx=5)
+
+        # Placing the frame on the grid in a new row, with full span
+        extras.grid(row=self.r(), pady=[0, 20], columnspan=self.c() if self.c() else 1)
