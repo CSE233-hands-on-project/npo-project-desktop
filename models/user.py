@@ -1,7 +1,8 @@
 from . import dbconnection as db
+from .usertype import UserType
+from .abstractmodel import AbstractModel
 import hashlib  # For password hashing
 import base64  # For encoding/decoding bytes
-from models.abstractmodel import AbstractModel
 
 
 class User(AbstractModel):
@@ -32,18 +33,12 @@ class User(AbstractModel):
         # Return whether the resulting password hash matches the stored one or not
         return passwordhash == db.submit_query(f'SELECT pass FROM users WHERE username = "{self.username}"')[0][0]
 
-    def build(self): pass
+    def build(self):
 
-        # TODO: fetch other datas
-
-        # TODO: create usertype via its class
-        # self.usertype = db.submit_query(f'''SELECT name FROM usertypes WHERE id = {self.usertypeid}''')[0][0]
-
-        # TODO: put these into usertype object
-        # self.accessibleviews = db.submit_query(f'''
-        #                                         SELECT *
-        #                                         FROM views
-        #                                         WHERE id IN (SELECT view_id
-        #                                                         FROM viewmappings
-        #                                                         WHERE usertype_id = {self.usertypeid})
-        #                                         ''')
+        self.fullname = db.submit_query(f'SELECT fullname FROM users WHERE username = "{self.username}"')[0][0]
+        self.type = UserType(db.submit_query(f'SELECT usertypeid FROM users WHERE username = "{self.username}"')[0][0])
+        self.attributes = []
+        for option in self.type.options: # TODO: create user attributes (create a sub-class Attribute???) from values
+            self.attributes.append(
+                db.submit_query(f'SELECT ')
+            )

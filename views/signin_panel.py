@@ -1,6 +1,4 @@
 from tkinter import Frame, ttk, Label, Entry, Button, PhotoImage
-
-from controllers import userlogin
 from .abstractview import AbstractView
 
 
@@ -16,7 +14,10 @@ class SigninPanel(AbstractView):
         for i in range(self.r()): self.root.rowconfigure(i, weight=1)  # Make rows span full width
         for i in range(self.c()): self.root.columnconfigure(i, weight=1)  # Make columns span full height
 
-        self.root.eval('tk::PlaceWindow . center')  # Center the window
+        # Center the window and set its min and max dimensions
+        self.root.eval('tk::PlaceWindow . center')
+        self.root.minsize(self.root.winfo_reqwidth(), self.root.winfo_reqheight())
+        self.root.maxsize(self.root.winfo_reqwidth() * 2, int(self.root.winfo_reqheight() * 1.2))
 
     def build_header(self):
 
@@ -39,7 +40,7 @@ class SigninPanel(AbstractView):
 
             self.root.update()  # Required to display the "Loading..." text while it actually loads
 
-            try: userlogin.attempt(username_entry.get(), password_entry.get())
+            try: self.parentcontroller.attemptlogin(username_entry.get(), password_entry.get())
             except ValueError as e:
                 sign_in_button.config(state="normal")
                 response_label.config(text=str(e), fg="red")
@@ -65,13 +66,14 @@ class SigninPanel(AbstractView):
         ttk.Separator(self.root, orient='horizontal').grid(sticky="nsew",
                                                            row=self.r(),
                                                            columnspan=self.c() if self.c() else 1)
-        eval_label = Label(self.root, text="For demonstration purposes only...", font=('Calibri Light', 10), fg="grey")
+        eval_label = Label(self.root, text="Don't have an account? That's alright!",
+                           font=('Calibri Light', 11, 'italic'), fg="#333333")
         eval_label.grid(row=self.r(), columnspan=self.c() if self.c() else 1, pady=5)
 
         # Creating a frame to contain two buttons side-by-side
         extras = Frame(self.root)
-        donation_button = Button(extras, text="Donate now", width=20, borderwidth=1, command=userlogin.donate)
-        register_button = Button(extras, text="Register for an event (WIP)", width=20, borderwidth=1, state='disabled')
+        donation_button = Button(extras, text="Register now (WIP)", width=24, borderwidth=1, state='disabled')
+        register_button = Button(extras, text="Volunteer in an event (WIP)", width=24, borderwidth=1, state='disabled')
         donation_button.grid(row=0, column=0, padx=5)
         register_button.grid(row=0, column=1, padx=5)
 

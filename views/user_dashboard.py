@@ -1,52 +1,65 @@
-from tkinter import Tk, Label, Message, Button, mainloop
-from models.user import User
-from views import signin_panel
 from importlib import import_module
+from tkinter import Label, Message, Button
+
+from models.user import User
+from models.usertype import UserType
+from .abstractview import AbstractView
+from controllers.abstractcontroller import AbstractController
 
 
-def launch(user: User):
+class UserDashboard(AbstractView):
+    def __init__(self, user: User, parentcontroller: AbstractController):
+        self.user = user
+        super().__init__(parentcontroller)
 
-    dashboard = Tk()
-    dashboard.resizable(False, False)
-    dashboard.title('CSE233 Project - User Dashboard')
-    welcome_label = Label(dashboard, text=f'Welcome, {user.usertype}...', width=65); welcome_label.pack(pady=[32, 0])
-    name_label = Label(dashboard, text=user.fullname, font="Times 12 bold italic"); name_label.pack(pady=[0, 20])
-    msg = Message(dashboard, width=400, fg="blue", text="Please pick an option...")  # won't pack here yet
+    def launch(self):
 
-    for view in user.accessibleviews:
+        self.root.resizable(False, False)
+        self.root.title('CSE233 Project - User Dashboard')
+        welcome_label = Label(self.root, text=f'Welcome, {self.user.type.name}...', width=65)
+        name_label = Label(self.root, text=self.user.fullname, font="Times 12 bold italic")
+        msg = Message(self.root, width=400, fg="blue", text="Please pick an option...")
 
-        # Import the module that has the same pathnamecode (column #3) as that in the user's accessible views list item
-        try: module = import_module('.' + view[2], "views")
-        except: pass
+        welcome_label.grid(row=self.r(), pady=[32, 0])
+        name_label.grid(row=self.r(), pady=[0, 20])
 
-        # Create a button per module that toggles the module and it itself gets toggled upon click
-        # Also, per button, a view corresponding to the imported module is created and manipulated
-        b = Button(dashboard, text=view[1], width=32, bg="lightgrey", relief="groove", command=module.View().toggle)
-        b.bind("<1>", lambda event, b=b: b.config(bg="lightgreen" if b.cget("bg") == "lightgrey" else "lightgrey"))
+        module: UserType.AccessibleModule  # Typehinting
+        for module in self.user.type.accessiblemodules:
 
-        # A module description area is also to be displayed at the bottom of the dashboard
-        b.bind("<Enter>", lambda event, t=view[3]: msg.config(text=t))
-        b.bind("<Leave>", lambda event: msg.config(text=""))
-        b.pack(pady=4)
+            # Import the module that has the same name as that in the current user type's accessible modules list item
+            # The module is described via its parent package and class name
+            try:
+                controllermodule = import_module('.' + module.packagename(), "controllers")
+                Controller = getattr(controllermodule, module.classname)
+            except Exception as e:
+                print(f"Exception occured during importing {module.packagename()}.{module.classname}")
+                print("Couldn't import package or class...")
+                print(f"{str(e)}\n\n")
+                continue
 
-        # Explaining some weird aspects regarding the use of lambda above
-        # https://realpython.com/python-lambda/#evaluation-time
-        # https://realpython.com/python-lambda/#closure
-        # Using a variable directly would make to the lambda function evaluate its value *during execution*
-        # In other words, it will not fetch/store the value of the variable during *function definition*
-        # Since this is a loop, the last value for any variable is the last value it has in the loop
-        # Accordingly, whenever the lambda function is executed later, it will fetch that last value
-        # Second point is the unused "event"
-        # The bind function requires its function argument to itself take an "event" argument
+            # Create a button that will be dedicated for toggling this module on or off (and reflects its state)
+            b = Button(self.root, text=module.displayname, width=32, bg="lightgrey", relief="groove")
 
-    msg.pack(pady=16)
+            # Start the controller with its toggle control assigned to the button
+            controller: AbstractController = Controller(toggler=b)
+            b.configure(command=controller.toggle)
+            controller.start()
 
-    def switch_to_login_panel():
-        dashboard.destroy(); signin_panel.launch()
+            # A module description area is also to be displayed at the bottom of the dashboard upon mouse hover
+            b.bind("<Enter>", lambda event, t=module.description: msg.config(text=t))
+            b.bind("<Leave>", lambda event: msg.config(text=""))
+            b.grid(row=self.r(), pady=4)
 
-    return_button = Button(dashboard, text="Back to login page", width=20, command=switch_to_login_panel)
-    return_button.pack(pady=[0, 32])
+            # Explaining some weird aspects regarding the use of lambda above
+            # https://realpython.com/python-lambda/#evaluation-time
+            # https://realpython.com/python-lambda/#closure
+            # Using a variable directly would make to the lambda function evaluate its value *during execution*
+            # In other words, it will not fetch/store the value of the variable during *function definition*
+            # Since this is a loop, the last value for any variable is the last value it has in the loop
+            # Accordingly, whenever the lambda function is executed later, it will fetch that last value
+            # Second point is the unused "event"
+            # The bind function requires its function argument to itself take an "event" argument
 
-    dashboard.eval('tk::PlaceWindow . center')  # Center the window
+        msg.grid(row=self.r(), pady=16)
 
-    mainloop()  # infinite loop to keep window open
+        self.root.eval('tk::PlaceWindow . center')  # Center the window

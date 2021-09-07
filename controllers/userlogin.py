@@ -1,48 +1,57 @@
 from models.user import User
 from views.signin_panel import SigninPanel
-from views import user_dashboard # TODO: make it from views.user_dashboard import UserDashboard
-from controllers import guestdonate
-
-signin_panel = None
-
-def start():
-    global signin_panel
-    signin_panel = SigninPanel()
-    signin_panel.launch()
-    signin_panel.root.mainloop()  # To keep the window open
+from .abstractcontroller import AbstractController
+from .userdashcontrol import UserDashboardController
 
 
-def attempt(username, password):
+class UserLogin(AbstractController):
 
-    # Ensure that both fields are filled
-    if not (username and password): raise ValueError("Please fill the empty fields.")
+    def start(self):
+        self.view = SigninPanel(self)
+        self.view.launch()
+        print("Sign-in panel has been launched")
 
-    # Create a basic user object with only the username
-    user = User(username)
+    def attemptlogin(self, username, password):
 
-    # Check if a user with that username actually exists
-    if user.exists():
+        # Ensure that both fields are filled
+        if not (username and password): raise ValueError("Please fill the empty fields.")
 
-        # If so, verify the input password
-        if user.verify(password):
+        # Create a basic user object with only the username
+        user = User(username)
 
-            # If valid, build it
-            user.build()
+        # Check if a user with that username actually exists
+        if user.exists():
 
-            # Then destroy sign in panel
-            signin_panel.root.destroy()
+            # If so, verify the input password
+            if user.verify(password):
 
-            # And launch the user's dashboard
-            user_dashboard.launch(user)  # TODO: Call a fellow controller instead
+                # If valid, build it
+                user.build()
 
-        # Otherwise, if password verification fails...
-        else: raise ValueError("Password is incorrect")
+                # Then destroy sign in panel
+                self.view.root.destroy()
+                print("Sign-in panel has been destroyed")
 
-    # Otherwise, if user does not exist...
-    else: raise ValueError("Username does not exist")
+                # And launch the user's dashboard by starting its controller
+                UserDashboardController(user).start()
 
-def donate():
+                # When its controller is done, re-start
+                self.start()
 
-    signin_panel.root.destroy()
-    guestdonate.start()
-    start() # (re)start actually, once the donate controller is done
+            # Otherwise, if password verification fails...
+            else: raise ValueError("Password is incorrect")
+
+        # Otherwise, if user does not exist...
+        else: raise ValueError("Username does not exist")
+
+    # def register():
+
+    #     # Destroy sign in panel
+    #     signin_panel.root.destroy()
+    #     print("Sign-in panel has been destroyed")
+
+    #     # Launch the donation panel by starting its controller
+    #     userregister.start()
+
+    #     # When done its controller is done, re-start
+    #     start()

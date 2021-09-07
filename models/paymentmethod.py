@@ -1,19 +1,20 @@
 from . import dbconnection as db
-from models.abstractmodel import AbstractModel
+from .abstractmodel import AbstractModel
 
 
 class PaymentMethod(AbstractModel):
-    def __init__(self): pass
+    def __init__(self, id):
+        self.id = id
+        self.build()
 
-    def build(self, id):
-
-        return db.submit_query(f'''
+    def build(self):
+        self.options = db.submit_query(f'''
                                 SELECT name, type
                                 FROM paymentoptions
                                 WHERE id IN (
                                     SELECT optionid
                                     FROM paymentmethodoptions
-                                    WHERE methodid = {id})
+                                    WHERE methodid = {self.id})
                                 ''')
 
     def get_all_pm_names():
