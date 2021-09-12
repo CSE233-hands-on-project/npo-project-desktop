@@ -8,15 +8,11 @@ class PaymentMethod(AbstractModel):
         self.build()
 
     def build(self):
-        self.options = db.submit_query(f'''
+        self.options = db.submit_query('''
                                 SELECT name, type
                                 FROM paymentoptions
                                 WHERE id IN (
                                     SELECT optionid
                                     FROM paymentmethodoptions
-                                    WHERE methodid = {self.id})
-                                ''')
-
-    def get_all_pm_names():
-
-        return db.submit_query(f'SELECT name FROM paymentmethods')
+                                    WHERE methodid = %s)
+                                ''', (self.id,))

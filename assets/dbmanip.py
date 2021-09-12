@@ -1,17 +1,21 @@
 import mysql.connector
+from mysql.connector.cursor import CursorBase
 
 
 class Connector:
 
-    def __init__(self, host, port, db, usr, pwd=""):
-        self.connection = mysql.connector.connect(host=host, port=port, database=db, user=usr, password=pwd)
+    connection = None
 
-    def submit_query(self, query, echo=False):
+    def __init__(self, host, port, db, usr, pwd=""):
+        if Connector.connection is None:
+            Connector.connection = mysql.connector.connect(host=host, port=port, database=db, user=usr, password=pwd)
+
+    def submit_query(self, query, qparams='', echo=False):
         return_stmt = None
-        c = self.connection.cursor(buffered=True)
+        c: CursorBase = Connector.connection.cursor(buffered=True)
         try:
-            c.execute(query)
-            self.connection.commit()  # TODO: Implement proper transaction handling
+            c.execute(query, qparams)
+            Connector.connection.commit()  # TODO: Implement proper transaction handling
             return_stmt = c.fetchall()
 
         except Exception as e:
@@ -22,6 +26,7 @@ class Connector:
             return return_stmt
 
     def __del__(self):
-        self.connection.close()
+        Connector.connection.close()
+        Connector.connection = None
 
 # Can use ".rollback()" to undo stuff

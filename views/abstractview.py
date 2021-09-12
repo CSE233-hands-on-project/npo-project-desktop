@@ -1,10 +1,9 @@
-from controllers.abstractcontroller import AbstractController
 from abc import ABC, abstractmethod
 from tkinter import Tk
 
 
 class AbstractView(ABC):
-    def __init__(self, parentcontroller: AbstractController, startwith__init__=True):
+    def __init__(self, parentcontroller, startwith__init__=True):
         super().__init__()
         self.parentcontroller = parentcontroller
         # First, create the basic window to be created for any view
@@ -24,3 +23,7 @@ class AbstractView(ABC):
     # Likewise for columns
     def c(self): return self.root.grid_size()[0]
     def r(self): return self.root.grid_size()[1]
+
+    # This method is responsible for emptying the current grid
+    def empty_grid(self):
+        for slave in self.root.grid_slaves(): slave.grid_forget()

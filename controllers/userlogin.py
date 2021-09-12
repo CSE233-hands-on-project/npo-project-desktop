@@ -1,4 +1,5 @@
-from models.user import User
+from models.users import User
+from models import constants as c
 from views.signin_panel import SigninPanel
 from .abstractcontroller import AbstractController
 from .userdashcontrol import UserDashboardController
@@ -14,7 +15,7 @@ class UserLogin(AbstractController):
     def attemptlogin(self, username, password):
 
         # Ensure that both fields are filled
-        if not (username and password): raise ValueError("Please fill the empty fields.")
+        if not (username and password): raise ValueError(c.get_error("emptyfields"))
 
         # Create a basic user object with only the username
         user = User(username)
@@ -39,10 +40,10 @@ class UserLogin(AbstractController):
                 self.start()
 
             # Otherwise, if password verification fails...
-            else: raise ValueError("Password is incorrect")
+            else: raise ValueError(c.get_error("pwderr"))
 
         # Otherwise, if user does not exist...
-        else: raise ValueError("Username does not exist")
+        else: raise ValueError(c.get_error("usrerr"))
 
     # def register():
 

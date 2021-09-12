@@ -1,12 +1,13 @@
 from tkinter import Frame, ttk, Label, Entry, Button, PhotoImage
 from .abstractview import AbstractView
+from models import constants as c
 
 
 class SigninPanel(AbstractView):
 
     def launch(self):
 
-        self.root.title('CSE233 Project - Landing Page')
+        self.root.title(c.get_prompt("signintitle"))
         self.build_header()
         self.build_form()
         self.build_extras()
@@ -24,8 +25,8 @@ class SigninPanel(AbstractView):
         # Store the image as an attribute of this object (otherwise it gets garbage collected and can't be used)
         self.headerimage = PhotoImage(file="./assets/Charity.png")
         image = Label(self.root, image=self.headerimage)
-        desc1 = Label(self.root, text="Welcome to your organization management portal", font="Times 16")
-        desc2 = Label(self.root, text="Please enter your username and password below", font="Calibri 12")
+        desc1 = Label(self.root, text=c.get_prompt("signindesc1"), font=c.get_font("primary"))
+        desc2 = Label(self.root, text=c.get_prompt("signindesc1"), font=c.get_font("secondary"))
 
         image.grid(row=self.r(), column=0, columnspan=3, pady=20)  # Place image in the first row
         desc1.grid(row=self.r(), column=0, columnspan=3, padx=40)  # Place description 1 below it
@@ -36,20 +37,21 @@ class SigninPanel(AbstractView):
         def signin():
 
             sign_in_button.config(state="disabled")
-            response_label.config(text="Loading...", fg="blue")
+            response_label.config(text=c.get_prompt("loadingprompt"), fg=c.get_color("information"))
 
             self.root.update()  # Required to display the "Loading..." text while it actually loads
 
             try: self.parentcontroller.attemptlogin(username_entry.get(), password_entry.get())
             except ValueError as e:
                 sign_in_button.config(state="normal")
-                response_label.config(text=str(e), fg="red")
+                response_label.config(text=str(e), fg=c.get_color("error"))
 
-        username_label = Label(self.root, text="Username:", font="Calibri 12")
+        username_label = Label(self.root, text=c.get_prompt("usernamelabel"), font=c.get_font("secondary"))
         username_entry = Entry(self.root, width=50); username_entry.focus()
-        password_label = Label(self.root, text="Password:", font="Calibri 12")
+        password_label = Label(self.root, text=c.get_prompt("passwordlabel"), font=c.get_font("secondary"))
         password_entry = Entry(self.root, width=50, show="*")
-        sign_in_button = Button(self.root, width=40, text="Sign in", font="Calibri 12", command=signin)
+        sign_in_button = Button(self.root, width=40, text=c.get_prompt(
+            "signinbuttonlabel"), font=c.get_font("secondary"), command=signin)
         response_label = Label(self.root, text="")
         self.root.bind("<Return>", lambda event: signin())
 
@@ -66,15 +68,17 @@ class SigninPanel(AbstractView):
         ttk.Separator(self.root, orient='horizontal').grid(sticky="nsew",
                                                            row=self.r(),
                                                            columnspan=self.c() if self.c() else 1)
-        eval_label = Label(self.root, text="Don't have an account? That's alright!",
-                           font=('Calibri Light', 11, 'italic'), fg="#333333")
+        eval_label = Label(self.root, text=c.get_prompt("noaccprompt"),
+                           font=f'{c.get_font("secondary")} italic', fg=c.get_color("secondarydark"))
         eval_label.grid(row=self.r(), columnspan=self.c() if self.c() else 1, pady=5)
 
         # Creating a frame to contain two buttons side-by-side
         extras = Frame(self.root)
-        donation_button = Button(extras, text="Register now (WIP)", width=24, borderwidth=1, state='disabled')
-        register_button = Button(extras, text="Volunteer in an event (WIP)", width=24, borderwidth=1, state='disabled')
-        donation_button.grid(row=0, column=0, padx=5)
+        volunteer_button = Button(extras, text=c.get_prompt("volunteerbuttonlabel"),
+                                  width=24, borderwidth=1, state='disabled')
+        register_button = Button(extras, text=c.get_prompt("registerbuttonlabel"),
+                                 width=24, borderwidth=1, state='disabled')
+        volunteer_button.grid(row=0, column=0, padx=5)
         register_button.grid(row=0, column=1, padx=5)
 
         # Placing the frame on the grid in a new row, with full span

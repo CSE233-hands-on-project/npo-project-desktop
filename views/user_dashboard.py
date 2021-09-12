@@ -1,8 +1,10 @@
+from controllers.abstracttoggleablecontroller import AbstractToggleableController
 from importlib import import_module
 from tkinter import Label, Message, Button
 
-from models.user import User
-from models.usertype import UserType
+import models.constants as c
+from models.users import User
+from models.usertypes import UserType
 from .abstractview import AbstractView
 from controllers.abstractcontroller import AbstractController
 
@@ -15,10 +17,10 @@ class UserDashboard(AbstractView):
     def launch(self):
 
         self.root.resizable(False, False)
-        self.root.title('CSE233 Project - User Dashboard')
-        welcome_label = Label(self.root, text=f'Welcome, {self.user.type.name}...', width=65)
-        name_label = Label(self.root, text=self.user.fullname, font="Times 12 bold italic")
-        msg = Message(self.root, width=400, fg="blue", text="Please pick an option...")
+        self.root.title(c.get_prompt("dashboardtitle"))
+        welcome_label = Label(self.root, text=f'{c.get_prompt("greetingprompt")} {self.user.type.name}...', width=65)
+        name_label = Label(self.root, text=self.user.fullname, font=f'{c.get_font("primary")} bold italic')
+        msg = Message(self.root, width=400, fg=c.get_color("information"), text=c.get_prompt("pickoptionprompt"))
 
         welcome_label.grid(row=self.r(), pady=[32, 0])
         name_label.grid(row=self.r(), pady=[0, 20])
@@ -38,16 +40,20 @@ class UserDashboard(AbstractView):
                 continue
 
             # Create a button that will be dedicated for toggling this module on or off (and reflects its state)
-            b = Button(self.root, text=module.displayname, width=32, bg="lightgrey", relief="groove")
+            b = Button(self.root, text=module.displayname, width=32, bg=c.get_color("idle"), relief="groove")
 
             # Start the controller with its toggle control assigned to the button
-            controller: AbstractController = Controller(toggler=b)
+            controller: AbstractToggleableController = Controller(toggler=b)
             b.configure(command=controller.toggle)
             controller.start()
 
             # A module description area is also to be displayed at the bottom of the dashboard upon mouse hover
             b.bind("<Enter>", lambda event, t=module.description: msg.config(text=t))
             b.bind("<Leave>", lambda event: msg.config(text=""))
+
+            # Upon pressing enter while button is focused, click it
+            b.bind("<Return>", lambda event, b=b: b.invoke() if b.focus_get() == b else print())
+
             b.grid(row=self.r(), pady=4)
 
             # Explaining some weird aspects regarding the use of lambda above

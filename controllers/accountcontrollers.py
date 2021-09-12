@@ -1,43 +1,22 @@
-from .abstractcontroller import AbstractController
+from .abstracttoggleablecontroller import AbstractToggleableController
 from views import placeholder
-from tkinter import Button
 
 
-class ManageMembers(AbstractController):
+class ManageMembers(AbstractToggleableController):
     def __init__(self, toggler): super().__init__(toggler=toggler)
     def start(self): self.view = placeholder.View(parentcontroller=self)
 
-    def toggle(self):
-        self.view.toggle()
-        try: self.toggler.configure(bg="lightgreen" if self.toggler.cget("bg") == "lightgrey" else "lightgrey")
-        except Exception: pass
 
-
-class AdjustRoles(AbstractController):
+class AdjustRoles(AbstractToggleableController):
     def __init__(self, toggler): super().__init__(toggler=toggler)
     def start(self): self.view = placeholder.View(parentcontroller=self)
 
-    def toggle(self):
-        self.view.toggle()
-        try: self.toggler.configure(bg="lightgreen" if self.toggler.cget("bg") == "lightgrey" else "lightgrey")
-        except Exception: pass
 
-
-class ChangePass(AbstractController):
+class ChangePass(AbstractToggleableController):
     def __init__(self, toggler): super().__init__(toggler=toggler)
     def start(self): self.view = placeholder.View(parentcontroller=self)
 
-    def toggle(self):
-        self.view.toggle()
-        try: self.toggler.configure(bg="lightgreen" if self.toggler.cget("bg") == "lightgrey" else "lightgrey")
-        except Exception: pass
 
-
-class ApprovePass(AbstractController):
+class ApprovePass(AbstractToggleableController):
     def __init__(self, toggler): super().__init__(toggler=toggler)
     def start(self): self.view = placeholder.View(parentcontroller=self)
-
-    def toggle(self):
-        self.view.toggle()
-        try: self.toggler.configure(bg="lightgreen" if self.toggler.cget("bg") == "lightgrey" else "lightgrey")
-        except Exception: pass

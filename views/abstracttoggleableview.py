@@ -2,7 +2,7 @@ from .abstractview import AbstractView
 from tkinter import Tk
 
 
-class AbstractDashboardChildView(AbstractView):
+class AbstractToggleableView(AbstractView):
     def __init__(self, parentcontroller):
         super().__init__(parentcontroller, startwith__init__=False)
 
